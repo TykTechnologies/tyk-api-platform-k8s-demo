@@ -1,4 +1,7 @@
 # Tyk K8S API Platform Teams Demo
+This repository will help you get started with Tyk OSS in kubernetes and allow 
+you to leverage OSS tools such as Keycloak and the Tyk Operator to manage your
+API authentication and authorization in k8s using OAuth2.0 
 
 ## Requirements
 1. [minikube](https://minikube.sigs.k8s.io/docs/start/)
