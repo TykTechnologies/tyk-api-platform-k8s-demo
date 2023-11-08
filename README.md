@@ -1,14 +1,13 @@
 # Tyk K8S API Platform Teams Demo
 
 ## Requirements
-1. minikube
-2. kubectl
-3. helm
-4. git
+1. [minikube](https://minikube.sigs.k8s.io/docs/start/)
+2. [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+3. [helm](https://helm.sh/docs/intro/install/)
 
 ## Installation
 
-#### Minikube
+### Minikube & Helm Repositories
 
 1. Fetch required helm repositories:
 ```
@@ -24,16 +23,16 @@ minikube start
 minikube addons enable ingress
 ```
 
-#### Tyk
+### Tyk
 
-1. Install Redis - Tyk requirement
+1. Install Redis. Redis is a requirement for Tyk Gateway. It is used as a performant key store. 
 ```
 helm install tyk-redis tyk-helm/simple-redis \
    --namespace tyk \
    --create-namespace
 ```
 
-2. Install Tyk API Gateway
+2. Install Tyk API Gateway.
 ```
 APISecret=topsecretpassword
 helm install tyk-gateway tyk-helm/tyk-oss \
@@ -42,8 +41,9 @@ helm install tyk-gateway tyk-helm/tyk-oss \
    --set global.secrets.APISecret=$APISecret
 ```
 
-#### Tyk Operator
-1. Create Tyk Operator Secret to allow Tyk Operator to connect to Tyk Gateway
+### Tyk Operator
+
+1. Create Tyk Operator k8s secret to allow Tyk Operator to connect to the Tyk Gateway.
 ```
 kubectl create secret generic tyk-operator-conf \
    --namespace tyk \
@@ -53,7 +53,7 @@ kubectl create secret generic tyk-operator-conf \
    --from-literal="TYK_ORG=tyk"
 ```
 
-2. Install CertManager - Tyk Operator requirement
+2. Install CertManager. CertManager is a requirement for the Tyk Operator. 
 ```
 helm install cert-manager jetstack/cert-manager \
    --version v1.10.1 \
@@ -62,14 +62,15 @@ helm install cert-manager jetstack/cert-manager \
    --set "prometheus.enabled=false"
 ```
 
-3. Install Tyk Operator
+3. Install Tyk Operator.
 ```
 helm install tyk-operator tyk-helm/tyk-operator \
    --namespace tyk
 ```
 
 #### Keycloak
-1. Install Keycloak Operator
+
+1. Install Keycloak Operator.
 ```
 kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/keycloaks.k8s.keycloak.org-v1.yml \
    --namespace tyk
@@ -79,10 +80,8 @@ kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resourc
    --namespace tyk
 ```
 
-2. Install Postgres - Keycloak requirement
+2. Install Postgres. Postgres is a requirement for Keycloak as a backend. 
 ```
-   --version 11.9.7 \
-
 POSTGRES_PASSWORD=topsecretpassword
 helm install keycloak-postgres bitnami/postgresql \
    --namespace tyk \
@@ -90,7 +89,7 @@ helm install keycloak-postgres bitnami/postgresql \
    --set "auth.postgresPassword=$POSTGRES_PASSWORD"
 ```
 
-3. Create Keycloak database credentials secret
+3. Create Keycloak database credentials secret. 
 ```
 kubectl create secret generic keycloak-db-secret \
    --namespace tyk \
@@ -98,7 +97,7 @@ kubectl create secret generic keycloak-db-secret \
    --from-literal="password=$POSTGRES_PASSWORD" 
 ```
 
-4. Create Keycloak credentials secret
+4. Create Keycloak credentials secret.
 ```
 KEYCLOAK_USERNAME=default@example.com
 KEYCLOAK_PASSWORD=topsecretpassword
@@ -108,7 +107,7 @@ kubectl create secret generic keycloak-initial-admin \
    --from-literal="password=$KEYCLOAK_PASSWORD"
 ```
 
-5. Create Keycloak CRD to install a Keycloak instance using the Keycloak Operator
+5. Create Keycloak CRD to install a Keycloak instance using the Keycloak Operator.
 ```
 kubectl apply -f ./keycloak.yaml \
    --namespace tyk
