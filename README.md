@@ -71,7 +71,21 @@ helm install tyk-operator tyk-helm/tyk-operator \
    --namespace tyk
 ```
 
-#### Keycloak
+### Deploy HttpBin service and expose it through the Tyk Gateway
+
+1. Deploy the HttpBin deployment and service
+```
+kubectl apply -f ./httpbin.yaml \
+   --namespace tyk
+```
+
+2. Expose the HttpBin service through the Tyk Gateway
+```
+kubectl apply -f ./httpbin-api.yaml \
+   --namespace tyk
+```
+
+### Keycloak
 
 1. Install Keycloak Operator.
 ```

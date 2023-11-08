@@ -1,0 +1,18 @@
+---
+apiVersion: tyk.tyk.io/v1alpha1
+kind: ApiDefinition
+metadata:
+  name: httpbin
+spec:
+  name: httpbin
+  protocol: http
+  active: true
+  proxy:
+    target_url: http://httpbin-svc.tyk.svc:8000
+    listen_path: /httpbin
+    strip_listen_path: true
+  enable_detailed_recording: true
+  use_keyless: true
+  auth_configs:
+    authToken:
+      auth_header_name: Authorization
