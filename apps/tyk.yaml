@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: redis
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
@@ -27,6 +29,8 @@ kind: Application
 metadata:
   name: tyk
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:

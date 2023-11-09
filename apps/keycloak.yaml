@@ -23,6 +23,8 @@ kind: Application
 metadata:
   name: keycloak-postgres
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
@@ -48,6 +50,8 @@ kind: Application
 metadata:
   name: keycloak
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
