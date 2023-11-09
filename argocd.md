@@ -12,39 +12,42 @@ API authentication and authorization in k8s using OAuth2.0
 
 ### Minikube & Helm Repositories
 
-1. Fetch required helm repositories:
-```
-helm repo add tyk-helm https://helm.tyk.io/public/helm/charts/
-helm repo add jetstack https://charts.jetstack.io
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-```
-
-2. Start Minikube
+Start Minikube
 ```
 minikube start
 minikube addons enable ingress
 ```
 
+### ArgoCD
+
+Install ArgoCD on Minikube
+
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+You can expose ArgoCD UI using the following command:
+```
+kubectl port-forward svc/argocd-server --namespace argocd 8443:443 &
+```
+
+You can access the Keycloak instance in your browser at [localhost:8443](http://localhost:8443):
+```
+Username: admin
+```
+
+You can get the ArgoCD admin password by running the following command:
+```
+kubectl get secrets -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
 ### Tyk
 
-1. Install Redis. Redis is a requirement for Tyk Gateway. It is used as a 
-performant key store. 
-```
-helm install tyk-redis tyk-helm/simple-redis \
-   --namespace tyk \
-   --create-namespace \
-   --wait
-```
+Install Tyk using ArgoCD Application CRDs
 
-2. Install Tyk API Gateway.
 ```
-APISecret=topsecretpassword
-helm install tyk-gateway tyk-helm/tyk-oss \
-   --namespace tyk \
-   --set 'global.redis.addrs[0]=redis.tyk.svc:6379' \
-   --set global.secrets.APISecret=$APISecret \
-   --wait 
+kubectl apply -f apps/tyk.yaml
 ```
 
 You can expose the Tyk Gateway to your localhost using the following command:
@@ -90,13 +93,13 @@ helm install tyk-operator tyk-helm/tyk-operator \
 
 1. Deploy the HttpBin deployment and service
 ```
-kubectl apply -f resources/httpbin/httpbin.yaml \
+kubectl apply -f ./httpbin.yaml \
    --namespace tyk
 ```
 
 2. Expose the HttpBin service through the Tyk Gateway
 ```
-kubectl apply -f resources/httpbin/httpbin-api.yaml \
+kubectl apply -f ./httpbin-api.yaml \
    --namespace tyk
 ```
 
@@ -109,11 +112,11 @@ curl localhost:8080/httpbin/get
 
 1. Install Keycloak Operator.
 ```
-kubectl apply -f resources/keycloak-operator/keycloaks.k8s.keycloak.org-v1.yml \
+kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/keycloaks.k8s.keycloak.org-v1.yml \
    --namespace tyk
-kubectl apply -f resources/keycloak-operator/keycloakrealmimports.k8s.keycloak.org-v1.yml \
+kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml \
    --namespace tyk
-kubectl apply -f resources/keycloak-operator/kubernetes.yml \
+kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/kubernetes.yml \
    --namespace tyk
 ```
 
@@ -147,13 +150,13 @@ kubectl create secret generic keycloak-initial-admin \
 
 5. Create Keycloak CRD to install a Keycloak instance using the Keycloak Operator.
 ```
-kubectl apply -f resources/keycloak/keycloak.yaml \
+kubectl apply -f ./keycloak.yaml \
    --namespace tyk
 ```
 
 6. Import Keycloak realm with preconfigured users to test out the OAuth2.0 flow.
 ```
-kubectl apply -f resources/keycloak/keycloak-realm.yaml \
+kubectl apply -f ./keycloak-realm.yaml \
    --namespace tyk
 ```
 
@@ -172,7 +175,7 @@ Password: topsecretpassword
 
 1. Expose the HttpBin service through the Tyk Gateway
 ```
-kubectl apply -f resources/httpbin/httpbin-keycloak.yaml \
+kubectl apply -f ./httpbin-keycloak.yaml \
    --namespace tyk
 ```
 
