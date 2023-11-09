@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: tyk-operator-conf
+  namespace: tyk
+data:
+  TYK_AUTH: dG9wc2VjcmV0cGFzc3dvcmQ=
+  TYK_MODE: Y2U=
+  TYK_ORG: dHlr
+  TYK_URL: aHR0cDovL2dhdGV3YXktc3ZjLXR5ay1nYXRld2F5LnR5ay5zdmM6ODA4MA==

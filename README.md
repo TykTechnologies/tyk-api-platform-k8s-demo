@@ -66,7 +66,7 @@ kubectl create secret generic tyk-operator-conf \
    --from-literal="TYK_MODE=ce" \
    --from-literal="TYK_URL=http://gateway-svc-tyk-gateway.tyk.svc:8080" \
    --from-literal="TYK_AUTH=$APISecret" \
-   --from-literal="TYK_ORG=tyk"
+   --from-literal="TYK_ORG=tyk" 
 ```
 
 2. Install CertManager. CertManager is a requirement for the Tyk Operator. 
