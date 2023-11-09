@@ -2,14 +2,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: operator-secret
+  name: keycloak-operator
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/TykTechnologies/tyk-api-platform-k8s-demo.git
     targetRevision: HEAD
-    path: resources/operator-secret
+    path: resources/keycloak-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: tyk
@@ -21,20 +21,20 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager
+  name: keycloak-postgres
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: v1.10.1
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql
+    targetRevision: v13.2.3
     helm:
-      releaseName: cert-manager
+      releaseName: keycloak-postgres
       values: |
-        installCRDs: true
-        prometheus:
-          enabled: false
+        auth:
+          database: keycloak-db
+          postgresPassword: topsecretpassword
   destination:
     server: https://kubernetes.default.svc
     namespace: tyk
@@ -46,16 +46,14 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tyk-operator
+  name: keycloak
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://helm.tyk.io/public/helm/charts
-    chart: tyk-operator
-    targetRevision: v0.15.1
-    helm:
-      releaseName: tyk-operator
+    repoURL: https://github.com/TykTechnologies/tyk-api-platform-k8s-demo.git
+    targetRevision: HEAD
+    path: resources/keycloak
   destination:
     server: https://kubernetes.default.svc
     namespace: tyk
