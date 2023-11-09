@@ -32,7 +32,8 @@ minikube addons enable ingress
 ```
 helm install tyk-redis tyk-helm/simple-redis \
    --namespace tyk \
-   --create-namespace
+   --create-namespace \
+   --wait
 ```
 
 2. Install Tyk API Gateway.
@@ -41,7 +42,8 @@ APISecret=topsecretpassword
 helm install tyk-gateway tyk-helm/tyk-oss \
    --namespace tyk \
    --set 'global.redis.addrs[0]=redis.tyk.svc:6379' \
-   --set global.secrets.APISecret=$APISecret
+   --set global.secrets.APISecret=$APISecret \
+   --wait 
 ```
 
 ### Tyk Operator
@@ -62,13 +64,15 @@ helm install cert-manager jetstack/cert-manager \
    --version v1.10.1 \
    --namespace tyk \
    --set "installCRDs=true" \
-   --set "prometheus.enabled=false"
+   --set "prometheus.enabled=false" \
+   --wait 
 ```
 
 3. Install Tyk Operator.
 ```
 helm install tyk-operator tyk-helm/tyk-operator \
-   --namespace tyk
+   --namespace tyk \
+   --wait
 ```
 
 ### Deploy HttpBin service and expose it through the Tyk Gateway
@@ -103,7 +107,8 @@ POSTGRES_PASSWORD=topsecretpassword
 helm install keycloak-postgres bitnami/postgresql \
    --namespace tyk \
    --set "auth.database=keycloak-db" \
-   --set "auth.postgresPassword=$POSTGRES_PASSWORD"
+   --set "auth.postgresPassword=$POSTGRES_PASSWORD" \
+   --wait
 ```
 
 3. Create Keycloak database credentials secret. 
@@ -128,4 +133,58 @@ kubectl create secret generic keycloak-initial-admin \
 ```
 kubectl apply -f ./keycloak.yaml \
    --namespace tyk
+```
+
+6. Import Keycloak realm with preconfigured users to test out the OAuth2.0 flow.
+```
+kubectl apply -f ./keycloak-realm.yaml \
+   --namespace tyk
+```
+
+### Expose HttpBin through the Tyk Gateway and manage AuthN and AuthZ using OAuth2.0
+
+1. Expose the HttpBin service through the Tyk Gateway
+```
+kubectl apply -f ./httpbin-keycloak.yaml \
+   --namespace tyk
+```
+
+2. There are three user profiles available; you can generate a JWT associated 
+with each profile using the following curl commands. The JWT can be passed to
+the gateway under the `Authorization` header:
+
+- Developer user, gives access to `/xml` endpoint:
+```
+curl -L --insecure -s -X POST 'http://localhost:7000/realms/keycloak-oauth/protocol/openid-connect/token' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   --data-urlencode 'client_id=keycloak-oauth' \
+   --data-urlencode 'grant_type=password' \
+   --data-urlencode 'client_secret=NoTgoLZpbrr5QvbNDIRIvmZOhe9wI0r0' \
+   --data-urlencode 'scope=openid' \
+   --data-urlencode 'username=random@example.com' \
+   --data-urlencode 'password=topsecretpassword' | jq -r '.access_token'
+```
+
+- Admin user, gives access to all endpoints:
+```
+curl -L --insecure -s -X POST 'http://localhost:7000/realms/keycloak-oauth/protocol/openid-connect/token' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   --data-urlencode 'client_id=keycloak-oauth' \
+   --data-urlencode 'grant_type=password' \
+   --data-urlencode 'client_secret=NoTgoLZpbrr5QvbNDIRIvmZOhe9wI0r0' \
+   --data-urlencode 'scope=openid' \
+   --data-urlencode 'username=developer@example.com' \
+   --data-urlencode 'password=topsecretpassword' | jq -r '.access_token'
+```
+
+- Random user, does not give access even if it can generate a valid Keycloak JWT::
+```
+curl -L --insecure -s -X POST 'http://localhost:7000/realms/keycloak-oauth/protocol/openid-connect/token' \
+   -H 'Content-Type: application/x-www-form-urlencoded' \
+   --data-urlencode 'client_id=keycloak-oauth' \
+   --data-urlencode 'grant_type=password' \
+   --data-urlencode 'client_secret=NoTgoLZpbrr5QvbNDIRIvmZOhe9wI0r0' \
+   --data-urlencode 'scope=openid' \
+   --data-urlencode 'username=admin@example.com' \
+   --data-urlencode 'password=topsecretpassword' | jq -r '.access_token'
 ```
