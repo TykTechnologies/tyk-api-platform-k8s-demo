@@ -13,6 +13,3 @@ spec:
     strip_listen_path: true
   enable_detailed_recording: true
   use_keyless: true
-  auth_configs:
-    authToken:
-      auth_header_name: Authorization
