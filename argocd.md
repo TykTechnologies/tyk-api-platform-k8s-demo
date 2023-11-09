@@ -82,54 +82,10 @@ curl localhost:8080/httpbin/get
 
 ### Keycloak
 
-1. Install Keycloak Operator.
-```
-kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/keycloaks.k8s.keycloak.org-v1.yml \
-   --namespace tyk
-kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml \
-   --namespace tyk
-kubectl apply -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/22.0.5/kubernetes/kubernetes.yml \
-   --namespace tyk
-```
+Install Keycloak using ArgoCD Application CRDs
 
-2. Install Postgres. Postgres is a requirement for Keycloak as a backend. 
 ```
-POSTGRES_PASSWORD=topsecretpassword
-helm install keycloak-postgres bitnami/postgresql \
-   --namespace tyk \
-   --set "auth.database=keycloak-db" \
-   --set "auth.postgresPassword=$POSTGRES_PASSWORD" \
-   --wait
-```
-
-3. Create Keycloak database credentials secret. 
-```
-kubectl create secret generic keycloak-db-secret \
-   --namespace tyk \
-   --from-literal="username=postgres" \
-   --from-literal="password=$POSTGRES_PASSWORD" 
-```
-
-4. Create Keycloak credentials secret.
-```
-KEYCLOAK_USERNAME=default@example.com
-KEYCLOAK_PASSWORD=topsecretpassword
-kubectl create secret generic keycloak-initial-admin \
-   --namespace tyk \
-   --from-literal="username=$KEYCLOAK_USERNAME" \
-   --from-literal="password=$KEYCLOAK_PASSWORD"
-```
-
-5. Create Keycloak CRD to install a Keycloak instance using the Keycloak Operator.
-```
-kubectl apply -f ./keycloak.yaml \
-   --namespace tyk
-```
-
-6. Import Keycloak realm with preconfigured users to test out the OAuth2.0 flow.
-```
-kubectl apply -f ./keycloak-realm.yaml \
-   --namespace tyk
+kubectl apply -f apps/keycloak.yaml
 ```
 
 You can expose Keycloak to your localhost using the following command:
@@ -145,13 +101,7 @@ Password: topsecretpassword
 
 ### Expose HttpBin through the Tyk Gateway and manage AuthN and AuthZ using OAuth2.0
 
-1. Expose the HttpBin service through the Tyk Gateway
-```
-kubectl apply -f ./httpbin-keycloak.yaml \
-   --namespace tyk
-```
-
-2. There are three user profiles available; you can generate a JWT associated 
+There are three user profiles available; you can generate a JWT associated 
 with each profile using the following curl commands. The JWT can be passed to
 the gateway under the `Authorization` header:
 
