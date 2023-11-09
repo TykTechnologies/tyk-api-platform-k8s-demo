@@ -5,6 +5,43 @@ metadata:
 spec:
   keycloakCRName: keycloak
   realm:
+    users:
+      - enabled: true
+        emailVerified: true
+        username: admin
+        email: admin@example.com
+        firstName: Admin
+        lastName: Example
+        credentials:
+          - value: topsecretpassword
+            type: password
+            temporary: false
+        groups:
+          - admins
+      - enabled: true
+        emailVerified: true
+        username: developer
+        email: developer@example.com
+        firstName: Developer
+        lastName: Example
+        credentials:
+          - value: topsecretpassword
+            type: password
+            temporary: false
+        groups:
+          - developers
+      - enabled: true
+        emailVerified: true
+        username: random
+        email: random@example.com
+        firstName: Random
+        lastName: Example
+        credentials:
+          - value: topsecretpassword
+            type: password
+            temporary: false
+        groups:
+          - randoms
     id: 9e470c18-f69f-4ebd-9006-5d4ed05c1cf2
     realm: keycloak-oauth
     notBefore: 0
