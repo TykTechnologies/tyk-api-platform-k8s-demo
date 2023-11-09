@@ -62,45 +62,17 @@ curl localhost:8080/hello
 
 ### Tyk Operator
 
-1. Create Tyk Operator k8s secret to allow Tyk Operator to connect to the Tyk Gateway.
-```
-kubectl create secret generic tyk-operator-conf \
-   --namespace tyk \
-   --from-literal="TYK_MODE=ce" \
-   --from-literal="TYK_URL=http://gateway-svc-tyk-gateway.tyk.svc:8080" \
-   --from-literal="TYK_AUTH=$APISecret" \
-   --from-literal="TYK_ORG=tyk" 
-```
+Install Tyk Operator using ArgoCD Application CRDs
 
-2. Install CertManager. CertManager is a requirement for the Tyk Operator. 
 ```
-helm install cert-manager jetstack/cert-manager \
-   --version v1.10.1 \
-   --namespace tyk \
-   --set "installCRDs=true" \
-   --set "prometheus.enabled=false" \
-   --wait 
-```
-
-3. Install Tyk Operator.
-```
-helm install tyk-operator tyk-helm/tyk-operator \
-   --namespace tyk \
-   --wait
+kubectl apply -f apps/tyk-operator.yaml
 ```
 
 ### Deploy HttpBin service and expose it through the Tyk Gateway
 
-1. Deploy the HttpBin deployment and service
+Install Tyk Operator using ArgoCD Application CRDs
 ```
-kubectl apply -f ./httpbin.yaml \
-   --namespace tyk
-```
-
-2. Expose the HttpBin service through the Tyk Gateway
-```
-kubectl apply -f ./httpbin-api.yaml \
-   --namespace tyk
+kubectl apply -f apps/httpbin.yaml
 ```
 
 You can access the httpbin api using the following curl command:
